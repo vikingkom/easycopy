@@ -46,11 +46,14 @@ def get_clipboard_files():
                 text=True,
                 timeout=2
             )
+            # Only proceed if osascript succeeded (exit code 0)
+            # and returned a properly formatted file URL
             if result.returncode == 0 and result.stdout.strip():
                 # Parse the file path from output
                 # Format: "file Macintosh HD:Users:name:path:to:file.txt"
                 output = result.stdout.strip()
-                if output.startswith('file '):
+                # Must start with "file " followed by a valid Mac path (contains colons)
+                if output.startswith('file ') and ':' in output[5:]:
                     # Remove "file " prefix and convert Mac path to Unix path
                     mac_path = output[5:]  # Remove "file "
                     # Remove drive name (e.g., "Macintosh HD:")
@@ -58,7 +61,9 @@ def get_clipboard_files():
                         mac_path = mac_path.split(':', 1)[1]
                     # Convert colon-separated path to slash-separated
                     unix_path = '/' + mac_path.replace(':', '/')
-                    return [unix_path]
+                    # Verify the path actually exists before returning
+                    if Path(unix_path).exists():
+                        return [unix_path]
         except Exception:
             pass
     
@@ -120,10 +125,12 @@ def upload_file(file_path):
     path = Path(file_path)
     
     if not path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
+        # This might not be a real file, skip and try text instead
+        return False
     
     if not path.is_file():
-        raise ValueError(f"Not a file: {file_path}")
+        # Not a regular file, skip
+        return False
     
     # Read file and encode to base64
     with open(path, "rb") as f:
@@ -182,8 +189,11 @@ def main():
         files = get_clipboard_files()
         if files:
             # Upload the first file (or we could upload all)
-            upload_file(files[0])
-            return
+            # If upload_file returns False, it means the path was invalid
+            # so we continue to try other content types
+            result = upload_file(files[0])
+            if result is not False:
+                return
         
         # Priority 2: Check for image in clipboard
         try:
@@ -193,8 +203,9 @@ def main():
                 if isinstance(clipboard_content, list):
                     # This is a list of file paths
                     if len(clipboard_content) > 0:
-                        upload_file(clipboard_content[0])
-                        return
+                        result = upload_file(clipboard_content[0])
+                        if result is not False:
+                            return
                 elif isinstance(clipboard_content, Image.Image):
                     # This is an actual image
                     upload_image(clipboard_content)

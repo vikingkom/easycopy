@@ -7,6 +7,7 @@ Cross-platform clipboard synchronization tool. Copy on one device, paste on anot
 - 📋 **Text**: Copy text on one machine, paste on another
 - 📁 **Files**: Copy files with full content transfer across devices
 - 🖼️ **Images**: Copy images/screenshots between devices
+- 🌐 **Web Viewer**: Monitor clipboard content in real-time via browser
 - 🚀 **Simple**: Just run scripts bound to keyboard shortcuts
 - 🔒 **Self-hosted**: Run your own server in Docker
 - 🌍 **Cross-platform**: Works on macOS, Linux, Windows, and Android (Termux)
@@ -267,12 +268,37 @@ python upload.py   # Test upload
 python download.py # Test download
 ```
 
+## Web Viewer
+
+A React-based web application for monitoring clipboard content in real-time.
+
+### Setup
+
+```bash
+cd webapp
+npm install
+npm run dev
+```
+
+The viewer will be available at `http://localhost:3000`
+
+### Features
+
+- 📊 Real-time monitoring with auto-refresh (5s)
+- 📝 Text display with truncation and copy button
+- 🖼️ Image preview and download
+- 📁 File information and download
+- 🔄 Manual refresh button
+- ⏱️ Last updated timestamp
+
+See [webapp/README.md](webapp/README.md) for detailed documentation.
+
 ## Future Enhancements
 
 - [ ] Clipboard history (multiple items)
 - [ ] End-to-end encryption
 - [ ] Authentication/multi-user support
-- [ ] Web UI for clipboard management
+- [x] Web UI for clipboard management
 - [ ] Persistent storage (Redis/Database)
 - [ ] Content expiration
 - [ ] File size limits

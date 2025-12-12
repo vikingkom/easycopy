@@ -27,13 +27,39 @@ def get_clipboard_files():
     """
     # On macOS, we can check if files are in clipboard
     if sys.platform == "darwin":
+        # Try AppKit first
         try:
             from AppKit import NSPasteboard, NSFilenamesPboardType
             pb = NSPasteboard.generalPasteboard()
             files = pb.propertyListForType_(NSFilenamesPboardType)
-            if files:
+            if files and len(files) > 0:
                 return [str(f) for f in files]
-        except ImportError:
+        except (ImportError, Exception):
+            pass
+        
+        # Fallback: use osascript
+        try:
+            import subprocess
+            result = subprocess.run(
+                ['osascript', '-e', 'the clipboard as «class furl»'],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                # Parse the file path from output
+                # Format: "file Macintosh HD:Users:name:path:to:file.txt"
+                output = result.stdout.strip()
+                if output.startswith('file '):
+                    # Remove "file " prefix and convert Mac path to Unix path
+                    mac_path = output[5:]  # Remove "file "
+                    # Remove drive name (e.g., "Macintosh HD:")
+                    if ':' in mac_path:
+                        mac_path = mac_path.split(':', 1)[1]
+                    # Convert colon-separated path to slash-separated
+                    unix_path = '/' + mac_path.replace(':', '/')
+                    return [unix_path]
+        except Exception:
             pass
     
     # On Linux with GTK
@@ -152,7 +178,7 @@ def upload_image(image):
 def main():
     """Main upload logic - detect clipboard type and upload"""
     try:
-        # Priority 1: Check for files in clipboard
+        # Priority 1: Check for files in clipboard (platform-specific)
         files = get_clipboard_files()
         if files:
             # Upload the first file (or we could upload all)
@@ -161,10 +187,18 @@ def main():
         
         # Priority 2: Check for image in clipboard
         try:
-            image = ImageGrab.grabclipboard()
-            if image and isinstance(image, Image.Image):
-                upload_image(image)
-                return
+            clipboard_content = ImageGrab.grabclipboard()
+            # On macOS, ImageGrab.grabclipboard() returns a list of file paths when files are copied
+            if clipboard_content:
+                if isinstance(clipboard_content, list):
+                    # This is a list of file paths
+                    if len(clipboard_content) > 0:
+                        upload_file(clipboard_content[0])
+                        return
+                elif isinstance(clipboard_content, Image.Image):
+                    # This is an actual image
+                    upload_image(clipboard_content)
+                    return
         except Exception as e:
             # Not an image or error reading image
             pass

@@ -101,7 +101,7 @@ def download_text(content, metadata):
 
 
 def download_file(content_base64, metadata):
-    """Download file and save to disk, copy path to clipboard"""
+    """Download file and save to disk, copy file to clipboard"""
     # Decode base64 content
     file_content = base64.b64decode(content_base64)
     
@@ -123,13 +123,30 @@ def download_file(content_base64, metadata):
     with open(file_path, 'wb') as f:
         f.write(file_content)
     
-    # Copy file path to clipboard
-    pyperclip.copy(str(file_path))
+    # Copy file to clipboard (platform-specific)
+    file_copied = False
+    if sys.platform == "darwin":
+        try:
+            from AppKit import NSPasteboard, NSURL, NSFilenamesPboardType
+            pb = NSPasteboard.generalPasteboard()
+            pb.clearContents()
+            pb.setPropertyList_forType_([str(file_path)], NSFilenamesPboardType)
+            file_copied = True
+        except (ImportError, Exception):
+            pass
     
-    print(f"✓ Downloaded file: {file_path}")
-    print(f"  Original: {metadata.get('original_path', 'unknown')}")
-    print(f"  Size: {len(file_content)} bytes")
-    print(f"  Path copied to clipboard")
+    if not file_copied:
+        # Fallback: copy file path to clipboard
+        pyperclip.copy(str(file_path))
+        print(f"✓ Downloaded file: {file_path}")
+        print(f"  Original: {metadata.get('original_path', 'unknown')}")
+        print(f"  Size: {len(file_content)} bytes")
+        print(f"  Path copied to clipboard (could not copy file to clipboard)")
+    else:
+        print(f"✓ Downloaded file: {file_path}")
+        print(f"  Original: {metadata.get('original_path', 'unknown')}")
+        print(f"  Size: {len(file_content)} bytes")
+        print(f"  File copied to clipboard")
 
 
 def download_image(content_base64, metadata):

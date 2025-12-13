@@ -41,3 +41,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Build artifacts
+server/static/
+**/node_modules/
+**/dist/

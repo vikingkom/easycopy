@@ -1,11 +1,25 @@
 #!/bin/bash
 # EasyCopy Server Startup Script
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+cd "$(dirname "$0")"
 
-# Activate the local virtual environment
-source .venv/bin/activate
+# Deactivate any active virtualenv
+[ -n "$VIRTUAL_ENV" ] && (deactivate 2>/dev/null || unset VIRTUAL_ENV)
 
-echo "Starting EasyCopy Server on http://localhost:8000"
-exec python main.py
+# Use pipenv if available
+if command -v pipenv &> /dev/null; then
+    echo "Starting EasyCopy Server on http://localhost:8000"
+    export PIPENV_IGNORE_VIRTUALENVS=1
+    cd .. && exec pipenv run python server/main.py
+fi
+
+# Fallback to system Python with fastapi
+for py in python3 python; do
+    if $py -c "import fastapi" 2>/dev/null; then
+        echo "Starting EasyCopy Server on http://localhost:8000"
+        exec $py main.py
+    fi
+done
+
+echo "Error: FastAPI not found. Install dependencies: pip install -r requirements.txt"
+exit 1

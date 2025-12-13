@@ -3,10 +3,10 @@ FROM node:18-slim AS webapp-builder
 WORKDIR /webapp
 
 # Copy webapp files
-COPY webapp/package.json webapp/package-lock.json* ./
+COPY ../webapp/package.json ../webapp/package-lock.json* ./
 RUN npm install
 
-COPY webapp/ ./
+COPY ../webapp/ ./
 RUN npm run build
 
 # Final stage

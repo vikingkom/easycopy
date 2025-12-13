@@ -5,12 +5,14 @@ Stores the latest clipboard content (text, file, or image) with metadata
 """
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, Literal
 import base64
 from datetime import datetime
+from pathlib import Path
 
 app = FastAPI(title="EasyCopy Server")
 
@@ -45,8 +47,8 @@ class ClipboardResponse(BaseModel):
     timestamp: Optional[str]
 
 
-@app.get("/")
-async def root():
+@app.get("/health")
+async def health():
     """Health check endpoint"""
     return {"status": "ok", "service": "easycopy-server"}
 
@@ -165,6 +167,12 @@ async def download_image():
         media_type=mime_type,
         headers={"Content-Disposition": f"inline; filename=clipboard_image.{image_format}"}
     )
+
+
+# Mount static files at root level to serve webapp assets
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
 
 
 if __name__ == "__main__":

@@ -4,5 +4,8 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Activate the local virtual environment
+source .venv/bin/activate
+
 echo "Starting EasyCopy Server on http://localhost:8000"
-exec python3 main.py
+exec python main.py

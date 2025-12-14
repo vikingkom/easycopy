@@ -11,6 +11,9 @@ function App() {
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [textExpanded, setTextExpanded] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(null)
+  const [uploadText, setUploadText] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [showUploadPanel, setShowUploadPanel] = useState(false)
 
   const fetchClipboardStatus = async () => {
     try {
@@ -86,6 +89,116 @@ function App() {
     } catch (err) {
       alert('Failed to download image')
       console.error('Download error:', err)
+    }
+  }
+
+  const uploadTextContent = async () => {
+    if (!uploadText.trim()) {
+      alert('Please enter some text to upload')
+      return
+    }
+
+    try {
+      setUploading(true)
+      setError(null)
+
+      const payload = {
+        type: 'text',
+        content: uploadText,
+        metadata: {
+          length: uploadText.length
+        }
+      }
+
+      const response = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) throw new Error('Upload failed')
+
+      await response.json()
+      alert('Text uploaded successfully!')
+      setUploadText('')
+      setShowUploadPanel(false)
+      await fetchClipboardStatus()
+    } catch (err) {
+      setError(err.message)
+      alert('Failed to upload text: ' + err.message)
+      console.error('Upload error:', err)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const uploadFile = async (file) => {
+    try {
+      setUploading(true)
+      setError(null)
+
+      // Read file as base64
+      const reader = new FileReader()
+      
+      reader.onload = async (e) => {
+        try {
+          const base64Content = e.target.result.split(',')[1] // Remove data:...;base64, prefix
+
+          const payload = {
+            type: 'file',
+            content: base64Content,
+            metadata: {
+              filename: file.name,
+              original_path: file.name,
+              size: file.size,
+              mime_type: file.type || 'application/octet-stream'
+            }
+          }
+
+          const response = await fetch(`${API_URL}/upload`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+          })
+
+          if (!response.ok) throw new Error('Upload failed')
+
+          await response.json()
+          alert('File uploaded successfully!')
+          setShowUploadPanel(false)
+          await fetchClipboardStatus()
+        } catch (err) {
+          setError(err.message)
+          alert('Failed to upload file: ' + err.message)
+          console.error('Upload error:', err)
+        } finally {
+          setUploading(false)
+        }
+      }
+
+      reader.onerror = () => {
+        setError('Failed to read file')
+        alert('Failed to read file')
+        setUploading(false)
+      }
+
+      reader.readAsDataURL(file)
+    } catch (err) {
+      setError(err.message)
+      alert('Failed to upload file: ' + err.message)
+      console.error('Upload error:', err)
+      setUploading(false)
+    }
+  }
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      uploadFile(file)
     }
   }
 
@@ -250,6 +363,13 @@ function App() {
         >
           {loading ? 'Refreshing...' : '🔄 Refresh'}
         </button>
+
+        <button 
+          onClick={() => setShowUploadPanel(!showUploadPanel)}
+          className="btn btn-primary"
+        >
+          {showUploadPanel ? '✕ Close Upload' : '⬆️ Upload'}
+        </button>
         
         <label className="auto-refresh-toggle">
           <input 
@@ -270,6 +390,45 @@ function App() {
       {error && (
         <div className="error-banner">
           ⚠️ Error: {error}
+        </div>
+      )}
+
+      {showUploadPanel && (
+        <div className="upload-panel">
+          <h3>Upload Content</h3>
+          
+          <div className="upload-section">
+            <h4>📝 Upload Text</h4>
+            <textarea
+              value={uploadText}
+              onChange={(e) => setUploadText(e.target.value)}
+              placeholder="Type or paste your text here..."
+              rows={6}
+              disabled={uploading}
+            />
+            <button 
+              onClick={uploadTextContent}
+              disabled={uploading || !uploadText.trim()}
+              className="btn btn-primary"
+            >
+              {uploading ? 'Uploading...' : 'Upload Text'}
+            </button>
+          </div>
+
+          <div className="upload-section">
+            <h4>📁 Upload File</h4>
+            <input
+              type="file"
+              onChange={handleFileSelect}
+              disabled={uploading}
+              id="file-upload"
+              style={{ display: 'none' }}
+            />
+            <label htmlFor="file-upload" className={`btn btn-secondary ${uploading ? 'disabled' : ''}`}>
+              {uploading ? 'Uploading...' : 'Choose File'}
+            </label>
+            <p className="upload-hint">Select any file to upload to clipboard</p>
+          </div>
         </div>
       )}
 

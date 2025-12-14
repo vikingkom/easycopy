@@ -261,6 +261,78 @@
   border-top: 1px solid #e9ecef;
 }
 
+.upload-panel {
+  background: #fff3cd;
+  border-bottom: 2px solid #ffc107;
+  padding: 30px;
+}
+
+.upload-panel h3 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.upload-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.upload-section:last-child {
+  margin-bottom: 0;
+}
+
+.upload-section h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #495057;
+  font-size: 1.1rem;
+}
+
+.upload-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  resize: vertical;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+
+.upload-section textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.upload-section textarea:disabled {
+  background: #e9ecef;
+  cursor: not-allowed;
+}
+
+.upload-section label.btn {
+  cursor: pointer;
+}
+
+.upload-section label.btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.upload-hint {
+  margin-top: 10px;
+  margin-bottom: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 768px) {
   .header h1 {
     font-size: 2rem;
@@ -277,5 +349,9 @@
   .last-updated {
     margin-left: 0;
     width: 100%;
+  }
+
+  .upload-panel {
+    padding: 20px;
   }
 }

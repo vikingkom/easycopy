@@ -17,14 +17,16 @@ cd server
 pip install -r requirements.txt
 ```
 
-### 2. Install Web Viewer Dependencies
+### 2. Build Web Viewer (First Time Only)
 
 ```bash
-cd ../webapp
-npm install
+cd server
+./build_webapp.sh
 ```
 
-### 3. Start Everything (Easy Mode)
+This builds the React webapp and copies it to `server/static/`.
+
+### 3. Start the Server (Easy Mode)
 
 From the project root:
 
@@ -33,27 +35,27 @@ From the project root:
 ```
 
 This will:
-- Start the FastAPI server on port 8000
-- Start the React web viewer on port 3000
-- Automatically open both in your browser
+- Build the webapp if needed (first time only)
+- Start the integrated FastAPI server on port 8000
+- Serve both the API and web viewer on the same port
 
 ### 4. Manual Start (Alternative)
 
-If you prefer to start components separately:
-
-**Terminal 1 - Server:**
+**Start Server:**
 ```bash
 cd server
 python main.py
 ```
 
-**Terminal 2 - Web Viewer:**
+Access everything at `http://localhost:8000`
+
+**For webapp development with hot reload:**
 ```bash
-cd webapp
-npm run dev
+cd server/webapp
+npm run dev  # Runs on port 8000 with API proxying
 ```
 
-**Terminal 3 - Test Upload:**
+**Test Upload:**
 ```bash
 cd client
 pip install -r requirements.txt
@@ -62,7 +64,7 @@ python upload.py
 
 ## Using the Web Viewer
 
-1. Open http://localhost:3000 in your browser
+1. Open http://localhost:8000 in your browser
 2. Copy something to your clipboard
 3. Run `python client/upload.py` to upload to server
 4. Watch the web viewer automatically update (or click Refresh)
@@ -89,7 +91,7 @@ python upload.py
 
 By default, the web viewer connects to `http://localhost:8000`.
 
-To change this, create `webapp/.env`:
+To change this, create `server/webapp/.env`:
 
 ```bash
 VITE_API_URL=http://your-server-ip:8000
@@ -108,40 +110,38 @@ export EASYCOPY_SERVER="http://your-server-ip:8000"
 ### Build the Web Viewer
 
 ```bash
-cd webapp
-npm run build
+cd server
+./build_webapp.sh
 ```
 
-This creates optimized static files in `webapp/dist/`.
+This creates optimized static files in `server/static/`.
 
-### Serve Static Files
+### Integrated Server
 
-**Option 1: Python HTTP Server**
+The web viewer is integrated into the FastAPI server and automatically served from `server/static/`.
+
+Just start the server:
 ```bash
-cd webapp/dist
-python3 -m http.server 3000
+cd server
+python main.py
 ```
 
-**Option 2: Nginx**
+Both the API and web viewer are available at `http://localhost:8000` - no separate web server needed
+
+**For custom deployment:**
+
+**Option 1: Nginx reverse proxy**
 ```nginx
 server {
     listen 80;
     server_name your-domain.com;
     
     location / {
-        root /path/to/easycopy/webapp/dist;
-        try_files $uri /index.html;
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
     }
 }
-```
-
-**Option 3: Serve from FastAPI**
-
-Add to `server/main.py`:
-```python
-from fastapi.staticfiles import StaticFiles
-
-app.mount("/", StaticFiles(directory="../webapp/dist", html=True), name="static")
 ```
 
 ### Docker Deployment
@@ -225,7 +225,7 @@ Copy some text first, then run the command.
 ### Test Web Viewer
 
 1. Upload some content
-2. Open http://localhost:3000
+2. Open http://localhost:8000
 3. Click "Refresh" button
 4. Verify content appears
 

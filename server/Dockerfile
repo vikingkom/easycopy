@@ -2,11 +2,11 @@ FROM node:18-slim AS webapp-builder
 
 WORKDIR /webapp
 
-# Copy webapp files
-COPY webapp/package.json webapp/package-lock.json* ./
+# Copy webapp files from server/webapp
+COPY server/webapp/package.json server/webapp/package-lock.json* ./
 RUN npm install
 
-COPY webapp/ ./
+COPY server/webapp/ ./
 RUN npm run build
 
 # Python backend stage

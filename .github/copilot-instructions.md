@@ -1,108 +1,119 @@
-# EasyCopy - AI Coding Agent Instructions
+# EasyCopy - AI Agent Instructions
 
 ## Architecture Overview
 
-EasyCopy is a client-server clipboard sync tool with three components:
+EasyCopy is a cross-platform clipboard sync tool with **three tightly-coupled components**:
 
-- **Server** (`server/main.py`): FastAPI app with in-memory storage, single global `clipboard_data` dict
-- **Upload Client** (`client/upload.py`): Detects clipboard content type and uploads to server
-- **Download Client** (`client/download.py`): Fetches from server and writes to local clipboard
+- **Server** (`server/main.py`): FastAPI app serving both API and integrated React webapp from single port 8000
+- **Upload Client** (`client/upload.py`): Detects clipboard type (files→images→text priority) and POSTs to `/upload`
+- **Download Client** (`client/download.py`): GETs from `/download` and writes to OS clipboard via platform APIs
 
-Data flow: Device clipboard → upload.py → FastAPI server → download.py → Device clipboard
+**Critical:** Server stores **only one clipboard item** in global `clipboard_data` dict (line 28-33 in main.py) - no history, no persistence, no database. Each upload replaces previous content.
 
-## Key Design Patterns
+```
+Device A clipboard → upload.py → FastAPI (port 8000) → download.py → Device B clipboard
+                                       ↓
+                                 React webapp (same port)
+```
 
-### Content Type Detection Priority (upload.py)
-1. Files first (platform-specific clipboard APIs)
-2. Images second (via `PIL.ImageGrab.grabclipboard()`)
-3. Text last (via `pyperclip.paste()`)
+## Key Design Decisions
 
-This ordering matters - don't reorder without reason. Files use native clipboard APIs (`AppKit.NSPasteboard` on macOS, GTK on Linux, `win32clipboard` on Windows).
+### Content Type Detection Order (upload.py lines 22-140)
+**Must check in this exact order:**
+1. **Files first** - Platform-specific APIs (NSPasteboard on macOS, GTK on Linux, win32clipboard on Windows)
+2. **Images second** - `PIL.ImageGrab.grabclipboard()`
+3. **Text last** - `pyperclip.paste()`
 
-### Base64 Encoding Convention
-Files and images are base64-encoded for JSON transport. Always decode with `base64.b64decode()` before writing files in `download.py`.
+**Why:** macOS reports files as images in Pillow, so file check must happen first. Don't reorder without testing on all platforms.
 
-### Metadata Structure
-Each upload includes `metadata` dict with type-specific fields:
-- Text: `{"length": int}`
-- File: `{"filename": str, "original_path": str, "size": int, "mime_type": str}`
-- Image: `{"format": str, "size": int, "dimensions": str}`
+### Base64 Transport Convention
+All non-text content (files, images) is base64-encoded for JSON transport (line 163 in upload.py, line 159 in download.py). Always use `base64.b64decode()` before writing - never try to write base64 string directly to files.
+
+### Integrated Webapp Architecture
+The webapp is **not a separate service** - it's built into `server/static/` and served by FastAPI's `StaticFiles` mount (line 174-175 in main.py). No separate web server, no port 3000 - everything on 8000.
 
 ## Development Workflow
 
-### Running Locally
+### Quick Start
 ```bash
-# Terminal 1 - Server
-cd server && pip install -r requirements.txt && python main.py
-
-# Terminal 2 - Test uploads
-cd client && pip install -r requirements.txt && python upload.py
-
-# Terminal 3 - Test downloads
-cd client && python download.py
+./start.sh  # Checks port, builds webapp if needed, starts server on 8000
 ```
 
-### Docker Deployment
+### Manual Development
 ```bash
-docker-compose up -d          # Start server
-docker-compose logs -f        # View logs
-docker-compose down           # Stop server
+# Server (builds webapp first time only)
+cd server && ./build_webapp.sh && python main.py
+
+# Clients (in separate terminals)
+cd client
+python upload.py    # Copy something first
+python download.py  # Pastes to clipboard
+
+# Webapp dev mode (optional, hot reload)
+cd server/webapp && npm run dev  # Port 8000 with API proxy
 ```
 
-Server listens on port 8000 (configured in `docker-compose.yml` and Dockerfile).
+### Docker Build
+Multi-stage `server/Dockerfile`:
+1. Node stage builds React app from `server/webapp/`
+2. Python stage copies built webapp to `static/`, installs FastAPI
 
-## Platform-Specific Code
+**Important:** Build context is repo root, not server dir (see docker-compose.yml line 6-7).
 
-### Clipboard File Access (upload.py lines 22-66)
-- **macOS**: Uses `AppKit.NSPasteboard` with `NSFilenamesPboardType`
-- **Linux**: Uses GTK3 `Gtk.Clipboard` checking `wait_is_uris_available()`
-- **Windows**: Uses `win32clipboard` with `CF_HDROP` format
+## Platform-Specific Gotchas
 
-When modifying file upload, test on each platform - these APIs behave differently.
+### macOS File Detection (upload.py lines 29-68)
+Uses `AppKit.NSPasteboard` with `NSFilenamesPboardType`. Falls back to osascript but **must validate** output format (`file Macintosh HD:...`) and verify path exists before returning - osascript fails gracefully but returns junk for non-file clipboard.
 
-### Image Clipboard Handling (download.py lines 21-91)
-- **macOS**: Saves PNG temporarily, loads as `NSImage`, copies with `writeObjects_`
-- **Linux**: Uses `GdkPixbuf` to load image and `clipboard.set_image()`
-- **Windows**: Converts to BMP format (strips 14-byte header) with `CF_DIB`
+### Image Clipboard on Windows (download.py lines 70-91)
+Windows needs **CF_DIB format** (device-independent bitmap), not raw PNG. Must strip 14-byte BMP header before calling `SetClipboardData()`.
 
-Image clipboard fallback: saves to `~/Downloads/easycopy/clipboard_image.png` if native API fails.
+### Linux GTK Dependencies
+Both clients need GTK3 bindings (`python3-gi`) installed via apt/dnf - pip can't install these. Document in setup instructions.
 
 ## Configuration
 
-### Environment Variables
-- `EASYCOPY_SERVER`: Server URL (default: `http://localhost:8000`)
-- `EASYCOPY_DOWNLOAD_DIR`: File download location (default: `~/Downloads/easycopy`)
+**Environment variables only** (no config files):
+- `EASYCOPY_SERVER`: Client target URL (default: `http://localhost:8000`)
+- `EASYCOPY_DOWNLOAD_DIR`: File save location (default: `~/Downloads/easycopy`)
+- `SSL_DOMAIN`: Production SSL cert domain (docker-compose.production.yml only)
 
-Both clients read these from `os.environ.get()`. No config files.
+Read with `os.environ.get()` in clients (line 19 in upload.py, line 19 in download.py).
 
-## Server State Management
+## API Endpoints
 
-Server uses **single in-memory dict** at module level - no database, no persistence. Each upload **replaces** previous content (no history). To add persistence, replace the global `clipboard_data` dict with Redis or SQLite.
+| Method | Path | Purpose | Returns 404? |
+|--------|------|---------|--------------|
+| POST | `/upload` | Replace clipboard | No |
+| GET | `/download` | Get full content | Yes if empty |
+| GET | `/status` | Get metadata only | No (returns `has_data: false`) |
+| DELETE | `/clear` | Empty clipboard | No |
+| GET | `/download/file` | Browser file download | Yes if not file |
+| GET | `/download/image` | Browser image display | Yes if not image |
+
+**State structure** (line 28-33 in main.py):
+```python
+clipboard_data = {
+    "type": "text"|"file"|"image"|None,
+    "content": str,  # Plain text or base64
+    "metadata": {"filename": str, "length": int, ...},
+    "timestamp": str  # ISO 8601
+}
+```
 
 ## Common Modifications
 
-### Adding Authentication
-Add API key header check in `server/main.py` endpoints. Update client requests to include header: `requests.post(..., headers={"X-API-Key": key})`.
+**Add clipboard history:** Replace `clipboard_data` dict with `collections.deque(maxlen=10)` in main.py. Change `/upload` to append, `/download` to return list. Update webapp to show history list.
 
-### Supporting Multiple Files
-Change `upload.py` line 140 from `upload_file(files[0])` to loop over all files. Modify server schema to accept list instead of single item.
+**Add authentication:** Insert API key check decorator on endpoints (line 53). Pass key in client requests: `requests.post(..., headers={"X-API-Key": os.environ["EASYCOPY_KEY"]})`. Update webapp fetch calls.
 
-### Adding Clipboard History
-Replace single `clipboard_data` dict with list/deque in `server/main.py`. Add `/history` endpoint returning recent items.
+**Support multiple files:** Change upload.py line 140 from `upload_file(files[0])` to loop. Modify `ClipboardUpload` schema to accept `content: list[str]`. Handle list in download.py.
 
-## Dependencies
+## Testing
 
-- **Server**: FastAPI 0.104+, uvicorn 0.24+ (ASGI server)
-- **Client**: Pillow 10.0+ (image handling), pyperclip 1.8+ (text clipboard), requests 2.31+
-- **Optional**: Platform-specific clipboard libraries (pyobjc-framework-Cocoa for macOS, python3-gi for Linux, pywin32 for Windows)
+**No automated tests.** Manual verification on each platform:
+1. Text: Copy → upload.py → download.py on different machine → verify paste
+2. Files: Copy file in Finder/Explorer → upload → download → check `~/Downloads/easycopy/`
+3. Images: Screenshot → upload → download → verify clipboard (or fallback file saved)
 
-Install platform libs only if file/image clipboard features needed.
-
-## Testing Strategy
-
-Manual testing approach (no automated tests currently):
-1. Copy text → run `upload.py` → run `download.py` on another terminal → verify clipboard
-2. Copy file in Finder → upload → download → check `~/Downloads/easycopy/`
-3. Screenshot → upload → download → verify image in clipboard
-
-Test each content type separately on target platforms.
+**Platform testing is critical** - clipboard APIs differ significantly. Test file detection on macOS vs Linux vs Windows separately.

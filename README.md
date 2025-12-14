@@ -257,6 +257,8 @@ MIT License - feel free to modify and use as needed.
 
 ## Development
 
+**Note:** The webapp is fully integrated into the server. There is no separate webapp server or port 3000 - everything runs on port 8000.
+
 ### Project Structure
 
 ```
@@ -268,21 +270,37 @@ easycopy/
 ├── server/
 │   ├── main.py           # FastAPI server
 │   ├── requirements.txt  # Server dependencies
-│   └── Dockerfile        # Docker container config
+│   ├── Dockerfile        # Docker container config
+│   ├── build_webapp.sh   # Build script for web viewer
+│   ├── webapp/           # React web viewer source
+│   │   ├── src/
+│   │   ├── package.json
+│   │   └── vite.config.js
+│   └── static/           # Built webapp (generated)
 ├── docker-compose.yml    # Docker Compose config
+├── start.sh             # Quick start script
 └── README.md            # This file
 ```
 
 ### Running in Development
 
-**Server:**
+**Quick Start (Server + Web Viewer):**
+```bash
+./start.sh
+```
+This builds and starts the integrated server with web viewer at `http://localhost:8000`
+
+**Manual Setup:**
+
+Server with integrated web viewer:
 ```bash
 cd server
+./build_webapp.sh  # First time only
 pip install -r requirements.txt
 python main.py
 ```
 
-**Client:**
+Client:
 ```bash
 cd client
 pip install -r requirements.txt
@@ -292,17 +310,27 @@ python download.py # Test download
 
 ## Web Viewer
 
-A React-based web application for monitoring clipboard content in real-time.
+A React-based web application integrated into the server for monitoring clipboard content in real-time.
 
-### Setup
+### Access
+
+The web viewer is available at the same URL as the server:
+- Development: `http://localhost:8000`
+- Production: `https://your-domain`
+
+### Building the Web Viewer
+
+The webapp is built automatically when using Docker. For local development:
 
 ```bash
-cd webapp
-npm install
-npm run dev
+cd server
+./build_webapp.sh
 ```
 
-The viewer will be available at `http://localhost:3000`
+Then start the server:
+```bash
+python main.py
+```
 
 ### Features
 
@@ -313,7 +341,7 @@ The viewer will be available at `http://localhost:3000`
 - 🔄 Manual refresh button
 - ⏱️ Last updated timestamp
 
-See [webapp/README.md](webapp/README.md) for detailed documentation.
+The webapp source is located in `server/webapp/` and is built into `server/static/` for serving.
 
 ## Future Enhancements
 

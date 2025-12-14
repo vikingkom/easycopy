@@ -7,7 +7,7 @@
 ./start.sh
 ```
 
-Then open http://localhost:3000
+Then open http://localhost:8000
 
 ## 📡 API Endpoints
 
@@ -77,7 +77,7 @@ Then open http://localhost:3000
 
 **Web Viewer:**
 ```bash
-# Create webapp/.env
+# Create server/webapp/.env (optional, defaults to http://localhost:8000)
 VITE_API_URL=http://your-server:8000
 ```
 
@@ -91,11 +91,11 @@ export EASYCOPY_SERVER="http://your-server:8000"
 ### Development
 
 ```bash
-# Server with auto-reload
-cd server && uvicorn main:app --reload
+# Server with integrated web viewer
+cd server && ./build_webapp.sh && uvicorn main:app --reload
 
-# Web viewer with hot reload
-cd webapp && npm run dev
+# Or use quick start
+./start.sh
 
 # Test upload
 cd client && python upload.py
@@ -206,7 +206,7 @@ cd webapp && npm install
    ```
 
 2. **Open web viewer**
-   - Navigate to http://localhost:3000
+   - Navigate to http://localhost:8000
    - Enable auto-refresh
 
 3. **Upload content**
@@ -228,16 +228,19 @@ cd webapp && npm install
 
 ```
 easycopy/
-├── server/          # FastAPI backend
+├── server/          # FastAPI backend with integrated webapp
+│   ├── main.py
+│   ├── webapp/      # React web viewer source
+│   │   ├── src/
+│   │   │   ├── App.jsx      # Main component
+│   │   │   ├── App.css      # Styles
+│   │   │   ├── main.jsx     # Entry point
+│   │   │   └── index.css    # Global styles
+│   │   ├── package.json
+│   │   └── vite.config.js
+│   ├── static/      # Built webapp (generated)
+│   └── build_webapp.sh
 ├── client/          # Upload/download scripts
-├── webapp/          # React web viewer
-│   ├── src/
-│   │   ├── App.jsx      # Main component
-│   │   ├── App.css      # Styles
-│   │   ├── main.jsx     # Entry point
-│   │   └── index.css    # Global styles
-│   ├── package.json
-│   └── vite.config.js
 ├── start.sh         # Quick start script
 ├── SETUP.md        # Detailed setup guide
 └── README.md       # Main documentation
@@ -248,8 +251,8 @@ easycopy/
 1. **Use auto-refresh** for continuous monitoring
 2. **Check "Last updated"** to see refresh status
 3. **Use browser DevTools** to debug connection issues
-4. **Keep server logs visible** during development
-5. **Bookmark** http://localhost:3000 for quick access
+5. **Keep server logs visible** during development
+6. **Bookmark** http://localhost:8000 for quick access
 
 ## 🚨 Need Help?
 

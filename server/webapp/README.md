@@ -1,51 +1,6 @@
-# ⚠️ Webapp Has Been Moved
+# EasyCopy Web Viewer
 
-**The webapp has been integrated into the server module.**
-
-## New Location
-
-The webapp source is now located at: **`server/webapp/`**
-
-This directory is kept for backward compatibility but will be removed in a future version.
-
-## Quick Start
-
-To build and run the server with integrated web viewer:
-
-```bash
-# Quick start (builds if needed and runs server)
-./start.sh
-
-# Or manually
-cd server
-./build_webapp.sh  # First time only
-python main.py
-```
-
-The web viewer will be available at `http://localhost:8000`
-
-## Development
-
-For webapp development with hot reload:
-
-```bash
-cd server/webapp
-npm install
-npm run dev  # Opens development server on port 3000
-```
-
-## Migration Notes
-
-- All webapp source files are now in `server/webapp/`
-- Built files are served from `server/static/`
-- The webapp is fully integrated into the FastAPI server
-- No separate web server needed - everything runs on port 8000
-
-See the main [README.md](../README.md) for full documentation.
-
----
-
-# Old Documentation (Deprecated)
+A React-based web application integrated into the EasyCopy server for monitoring and interacting with clipboard content.
 
 ## Features
 
@@ -57,16 +12,47 @@ See the main [README.md](../README.md) for full documentation.
 - 🔄 Manual refresh button
 - ⏱️ Last updated timestamp
 - 📱 Responsive design
+- 🚀 Fully integrated - served from the same FastAPI server on port 8000
 
-## Configuration (Old)
+## Prerequisites
 
-Create a `.env` file in the webapp directory (optional):
+- Node.js 18+ and npm (for building)
+- EasyCopy server
+
+## Quick Start
+
+The webapp is built and served automatically by the server. Just run:
+
+```bash
+cd ..  # Go to server directory
+./build_webapp.sh  # First time only
+python main.py
+```
+
+Access at `http://localhost:8000`
+
+## Development Mode
+
+For webapp development with hot reload:
+
+```bash
+npm install
+npm run dev
+```
+
+The development server runs on port 8000 with API proxying to the backend.
+
+## Configuration
+
+Create a `.env` file (optional):
 
 ```bash
 VITE_API_URL=http://localhost:8000
 ```
 
-## Old Build Instructions
+Defaults to `http://localhost:8000` if not specified.
+
+## Build for Production
 
 ```bash
 npm run build
@@ -99,7 +85,7 @@ python3 -m http.server 3000
    python upload.py
    ```
 
-3. **Open the web viewer** at http://localhost:3000
+3. **Open the web viewer** at http://localhost:8000
 
 4. The viewer will automatically:
    - Fetch clipboard status every 5 seconds (if auto-refresh is enabled)

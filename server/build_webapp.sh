@@ -1,13 +1,17 @@
 #!/bin/bash
 # Build the React webapp and copy to server/static/
-# This script is a convenience wrapper that calls server/build_webapp.sh
 
 set -e
 
 echo "Building EasyCopy webapp..."
 
-cd server
-./build_webapp.sh
+cd "$(dirname "$0")/webapp"
+npm install
+npm run build
+
+echo "Copying build to static/..."
+mkdir -p ../static
+cp -r dist/* ../static/
 
 echo "✓ Webapp built successfully!"
 echo "  Output: server/static/"

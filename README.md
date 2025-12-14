@@ -312,14 +312,20 @@ easycopy/
 ```
 This builds and starts the integrated server with web viewer at `http://localhost:8000`
 
+
 **Manual Setup:**
 
-Server with integrated web viewer:
+Server with integrated web viewer (local build):
 ```bash
 cd server
 ./build_webapp.sh  # First time only
 pip install -r requirements.txt
 python main.py
+```
+
+Or using Docker Compose (prebuilt image):
+```bash
+docker compose up -d
 ```
 
 Client:

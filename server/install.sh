@@ -33,9 +33,10 @@ echo ""
 # Download necessary files
 echo "📥 Downloading files..."
 
+
 REPO_BASE="https://raw.githubusercontent.com/vikingkom/easycopy/master/server"
 
-curl -sSL "$REPO_BASE/docker-compose.yml" -o docker-compose.yml
+curl -sSL "$REPO_BASE/docker-compose.build.yml" -o docker-compose.build.yml
 curl -sSL "$REPO_BASE/easycopy.env.template" -o .env
 
 echo "✅ Files downloaded"
@@ -52,6 +53,7 @@ fi
 
 echo ""
 
+
 # Determine docker compose command
 if docker compose version &> /dev/null; then
     DOCKER_COMPOSE="docker compose"
@@ -59,9 +61,9 @@ else
     DOCKER_COMPOSE="docker-compose"
 fi
 
-# Start the container
-echo "🐳 Starting EasyCopy server..."
-$DOCKER_COMPOSE up -d
+# Start the container using the build compose file
+echo "🐳 Starting EasyCopy server (build mode)..."
+$DOCKER_COMPOSE -f docker-compose.build.yml up -d
 
 echo ""
 echo "╔═══════════════════════════════════════╗"

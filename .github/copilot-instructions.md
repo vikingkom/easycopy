@@ -58,7 +58,7 @@ Multi-stage `server/Dockerfile`:
 1. Node stage builds React app from `server/webapp/`
 2. Python stage copies built webapp to `static/`, installs FastAPI
 
-**Important:** Build context is repo root (`..` from server dir) - see `server/docker-compose.yml` context setting.
+**Important:** Build context is repo root (`..` from server dir) - see `server/docker-compose.build.yml` context setting.
 
 ## Platform-Specific Gotchas
 

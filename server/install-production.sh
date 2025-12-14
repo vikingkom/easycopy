@@ -48,10 +48,8 @@ echo ""
 echo "📋 Domain: $DOMAIN"
 echo ""
 
-# Create installation directory
-INSTALL_DIR="${EASYCOPY_INSTALL_DIR:-$HOME/.easycopy}"
-mkdir -p "$INSTALL_DIR"
-cd "$INSTALL_DIR"
+# Use current directory for installation
+INSTALL_DIR="$(pwd)"
 
 echo "📁 Installing to: $INSTALL_DIR"
 echo ""

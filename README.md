@@ -25,35 +25,57 @@ Device A                     Docker Server              Device B
 
 ## Quick Start
 
-### 1. Start the Server
+### 1. Install the Server
 
-#### Development (HTTP)
+#### Development / Local Setup (HTTP)
 
-```bash
-# Local development - simple HTTP server
-docker-compose up -d
-```
-
-The server will be available at `http://localhost:8000`
-
-#### Production (HTTPS)
-
-For secure production deployment with HTTPS:
+**One-command installation:**
 
 ```bash
-# 1. (Optional) Set your domain for SSL certificate
-export SSL_DOMAIN=your-domain.com
-# Or create .env file: echo "SSL_DOMAIN=your-domain.com" > .env
-
-# 2. Start with production config (auto-generates SSL certificates)
-docker-compose -f docker-compose.production.yml up -d
+curl -sSL https://raw.githubusercontent.com/vikingkom/easycopy/master/server/install.sh | bash
 ```
 
-SSL certificates are automatically generated on first run. The server will be available at:
-- `https://your-domain` (HTTPS)
-- `http://your-domain` (redirects to HTTPS)
+This will:
+- Check Docker installation
+- Download necessary files to `~/.easycopy`
+- Create configuration with your preferences (port, domain, download directory)
+- Start the server automatically
 
-**For production with Let's Encrypt:** See [HTTPS_SETUP.md](HTTPS_SETUP.md) for detailed instructions on setting up trusted SSL certificates with your domain.
+The server will be available at `http://localhost:8000` (or your configured port/domain).
+
+#### Production Setup (HTTPS)
+
+**One-command production installation:**
+
+```bash
+curl -sSL https://raw.githubusercontent.com/vikingkom/easycopy/master/server/install-production.sh | bash
+```
+
+This will:
+- Require a domain name
+- Set up nginx reverse proxy with SSL
+- Generate self-signed certificates (or configure for Let's Encrypt)
+- Enable automatic updates with Watchtower
+
+For trusted SSL certificates with Let's Encrypt, see [HTTPS_SETUP.md](server/HTTPS_SETUP.md).
+
+#### Manual Installation (Alternative)
+
+```bash
+# Clone the repository
+git clone https://github.com/vikingkom/easycopy.git
+cd easycopy/server
+
+# Copy and edit configuration
+cp easycopy.env.template easycopy.env
+# Edit easycopy.env with your preferred settings
+
+# For development (HTTP)
+docker compose up -d
+
+# For production (HTTPS)
+docker compose -f docker-compose.production.yml up -d
+```
 
 ### 2. Setup Client
 

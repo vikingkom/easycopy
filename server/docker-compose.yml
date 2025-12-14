@@ -3,11 +3,13 @@ version: '3.8'
 services:
   easycopy-server:
     build:
-      context: .
+      context: ..
       dockerfile: server/Dockerfile
     ports:
-      - "8000:8000"
+      - "${EASYCOPY_PORT:-8000}:8000"
     restart: unless-stopped
+    env_file:
+      - easycopy.env
     environment:
-      - TZ=UTC
+      - TZ=${TZ:-UTC}
     container_name: easycopy-server

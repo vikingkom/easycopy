@@ -58,7 +58,7 @@ Multi-stage `server/Dockerfile`:
 1. Node stage builds React app from `server/webapp/`
 2. Python stage copies built webapp to `static/`, installs FastAPI
 
-**Important:** Build context is repo root, not server dir (see docker-compose.yml line 6-7).
+**Important:** Build context is repo root (`..` from server dir) - see `server/docker-compose.yml` context setting.
 
 ## Platform-Specific Gotchas
 
@@ -73,10 +73,12 @@ Both clients need GTK3 bindings (`python3-gi`) installed via apt/dnf - pip can't
 
 ## Configuration
 
-**Environment variables only** (no config files):
+**Configuration** (`server/easycopy.env` for server, environment variables for clients):
 - `EASYCOPY_SERVER`: Client target URL (default: `http://localhost:8000`)
 - `EASYCOPY_DOWNLOAD_DIR`: File save location (default: `~/Downloads/easycopy`)
-- `SSL_DOMAIN`: Production SSL cert domain (docker-compose.production.yml only)
+- `EASYCOPY_PORT`: Server port (default: 8000)
+- `EASYCOPY_DOMAIN`: Server domain (optional)
+- `SSL_DOMAIN`: Production SSL cert domain (server/docker-compose.production.yml only)
 
 Read with `os.environ.get()` in clients (line 19 in upload.py, line 19 in download.py).
 

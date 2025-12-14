@@ -38,6 +38,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
+easycopy.env
 
 # Logs
 *.log

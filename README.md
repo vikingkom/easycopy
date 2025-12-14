@@ -27,17 +27,33 @@ Device A                     Docker Server              Device B
 
 ### 1. Start the Server
 
-```bash
-# Using docker-compose (recommended)
-docker-compose up -d
+#### Development (HTTP)
 
-# Or build and run manually
-cd server
-docker build -t easycopy-server .
-docker run -d -p 8000:8000 easycopy-server
+```bash
+# Local development - simple HTTP server
+docker-compose up -d
 ```
 
 The server will be available at `http://localhost:8000`
+
+#### Production (HTTPS)
+
+For secure production deployment with HTTPS:
+
+```bash
+# 1. (Optional) Set your domain for SSL certificate
+export SSL_DOMAIN=your-domain.com
+# Or create .env file: echo "SSL_DOMAIN=your-domain.com" > .env
+
+# 2. Start with production config (auto-generates SSL certificates)
+docker-compose -f docker-compose.production.yml up -d
+```
+
+SSL certificates are automatically generated on first run. The server will be available at:
+- `https://your-domain` (HTTPS)
+- `http://your-domain` (redirects to HTTPS)
+
+**For production with Let's Encrypt:** See [HTTPS_SETUP.md](HTTPS_SETUP.md) for detailed instructions on setting up trusted SSL certificates with your domain.
 
 ### 2. Setup Client
 
@@ -72,10 +88,16 @@ pip install pywin32
 Set the environment variable to point to your server:
 
 ```bash
-export EASYCOPY_SERVER="http://your-server-ip:8000"
+# For local development (HTTP)
+export EASYCOPY_SERVER="http://localhost:8000"
+
+# For production deployment (HTTPS)
+export EASYCOPY_SERVER="https://your-domain"
 ```
 
 Make it permanent by adding to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.)
+
+**Note:** When using self-signed certificates, Python's requests library may show SSL verification warnings. For production, use proper CA-signed certificates or Let's Encrypt (see [HTTPS_SETUP.md](HTTPS_SETUP.md)).
 
 ### 4. Test the Scripts
 

@@ -9,8 +9,8 @@ RUN npm install
 COPY webapp/ ./
 RUN npm run build
 
-# Final stage
-FROM python:3.11-slim
+# Python backend stage
+FROM python:3.11-slim AS backend
 
 WORKDIR /app
 

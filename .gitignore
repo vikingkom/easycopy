@@ -46,3 +46,12 @@ Thumbs.db
 server/static/
 **/node_modules/
 **/dist/
+
+# SSL certificates (sensitive - if using file-based certs)
+ssl/
+*.key
+*.crt
+*.pem
+
+# Environment variables
+.env

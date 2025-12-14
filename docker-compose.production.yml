@@ -2,10 +2,7 @@ version: '3.8'
 
 services:
   easycopy-server:
-    build:
-      context: .
-      dockerfile: server/Dockerfile
-      target: backend
+    image: vikingkom/easycopy-server:latest
     restart: unless-stopped
     environment:
       - TZ=UTC

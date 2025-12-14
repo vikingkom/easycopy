@@ -9,7 +9,7 @@ services:
       - "${EASYCOPY_PORT:-8000}:8000"
     restart: unless-stopped
     env_file:
-      - easycopy.env
+      - .env
     environment:
       - TZ=${TZ:-UTC}
     container_name: easycopy-server

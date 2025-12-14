@@ -37,15 +37,9 @@ curl -sSL https://raw.githubusercontent.com/vikingkom/easycopy/master/server/ins
 
 This will:
 - Check Docker installation
-- Download necessary files to current directory
+- Download necessary files to `~/.easycopy`
 - Create configuration with your preferences (port, domain, download directory)
 - Start the server automatically
-
-**Recommended:** Create a dedicated directory first:
-```bash
-mkdir -p ~/easycopy && cd ~/easycopy
-curl -sSL https://raw.githubusercontent.com/vikingkom/easycopy/master/server/install.sh | bash
-```
 
 The server will be available at `http://localhost:8000` (or your configured port/domain).
 

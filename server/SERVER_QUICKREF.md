@@ -12,15 +12,11 @@ curl -sSL https://raw.githubusercontent.com/vikingkom/easycopy/master/server/ins
 curl -sSL https://raw.githubusercontent.com/vikingkom/easycopy/master/server/install-production.sh | bash
 ```
 
-Installs to current directory. Create a dedicated directory first:
-```bash
-mkdir -p ~/easycopy && cd ~/easycopy
-curl -sSL https://raw.githubusercontent.com/vikingkom/easycopy/master/server/install.sh | bash
-```
+Default installation directory: `~/.easycopy`
 
 ## Configuration
 
-Edit `easycopy.env` in your installation directory:
+Edit `~/.easycopy/easycopy.env` (or `easycopy.env` in your installation directory):
 
 ```bash
 # Server port
@@ -38,13 +34,13 @@ TZ=UTC
 
 After changing configuration:
 ```bash
-# From your installation directory
+cd ~/.easycopy
 docker compose restart
 ```
 
 ## Server Management
 
-All commands should be run from your installation directory
+All commands should be run from your installation directory (default: `~/.easycopy`)
 
 ### Start server
 ```bash
@@ -125,7 +121,7 @@ curl http://localhost:8000/health
 
 ### Reset everything
 ```bash
-# From your installation directory
+cd ~/.easycopy
 docker compose down
 docker compose up -d
 ```
@@ -133,10 +129,9 @@ docker compose up -d
 ## Uninstallation
 
 ```bash
-# From your installation directory
+cd ~/.easycopy
 docker compose down
-cd ..
-rm -rf easycopy  # or whatever your directory name is
+rm -rf ~/.easycopy
 ```
 
 Remove client configuration from shell profile.

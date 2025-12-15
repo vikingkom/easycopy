@@ -14,7 +14,7 @@ To build and run the server with integrated web viewer:
 
 ```bash
 # Quick start (builds if needed and runs server)
-./start.sh
+cd server && ./build_webapp.sh && python main.py
 
 # Or manually
 cd server

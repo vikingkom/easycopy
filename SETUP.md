@@ -31,7 +31,7 @@ This builds the React webapp and copies it to `server/static/`.
 From the project root:
 
 ```bash
-./start.sh
+cd server && ./build_webapp.sh && python main.py
 ```
 
 This will:

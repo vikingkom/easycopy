@@ -4,7 +4,7 @@
 
 ```bash
 # From project root
-./start.sh
+cd server && ./build_webapp.sh && python main.py
 ```
 
 Then open http://localhost:8000
@@ -93,9 +93,6 @@ export EASYCOPY_SERVER="http://your-server:8000"
 ```bash
 # Server with integrated web viewer
 cd server && ./build_webapp.sh && uvicorn main:app --reload
-
-# Or use quick start
-./start.sh
 
 # Test upload
 cd client && python upload.py
@@ -202,7 +199,7 @@ cd webapp && npm install
 
 1. **Start services**
    ```bash
-   ./start.sh
+   cd server && ./build_webapp.sh && python main.py
    ```
 
 2. **Open web viewer**
@@ -241,7 +238,6 @@ easycopy/
 │   ├── static/      # Built webapp (generated)
 │   └── build_webapp.sh
 ├── client/          # Upload/download scripts
-├── start.sh         # Quick start script
 ├── SETUP.md        # Detailed setup guide
 └── README.md       # Main documentation
 ```

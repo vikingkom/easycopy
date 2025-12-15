@@ -3,13 +3,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
-// API URL is loaded at runtime from /config.json (see server/main.py)
 const AUTO_REFRESH_INTERVAL = 5000 // 5 seconds
-
-function getDefaultApiUrl() {
-  // Fallback to window.location.origin if config.json is missing
-  return window.location.origin
-}
 
 function App() {
   const [clipboardData, setClipboardData] = useState(null)
@@ -21,17 +15,6 @@ function App() {
   const [uploadText, setUploadText] = useState('')
   const [uploading, setUploading] = useState(false)
   const [showUploadPanel, setShowUploadPanel] = useState(false)
-  const [apiUrl, setApiUrl] = useState(getDefaultApiUrl())
-
-  // Load API URL from /config.json at startup
-  useEffect(() => {
-    fetch('/config.json')
-      .then(res => res.ok ? res.json() : null)
-      .then(cfg => {
-        if (cfg && cfg.api_url) setApiUrl(cfg.api_url)
-      })
-      .catch(() => {})
-  }, [])
 
   // ...existing logic for fetchClipboardStatus, copyToClipboard, downloadFile, downloadImage, uploadTextContent, uploadFile, handleFileSelect, formatTimestamp, formatFileSize, getTruncatedText, useEffect for autoRefresh...
 
@@ -40,7 +23,7 @@ function App() {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch(`${apiUrl}/status`)
+      const response = await fetch('/status')
       if (!response.ok) throw new Error('Failed to fetch clipboard status')
       const data = await response.json()
       if (data.has_data) {
@@ -69,7 +52,7 @@ function App() {
 
   const downloadFile = async () => {
     try {
-      const response = await fetch(`${apiUrl}/download/file`)
+      const response = await fetch('/download/file')
       if (!response.ok) throw new Error('Download failed')
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
@@ -88,7 +71,7 @@ function App() {
 
   const downloadImage = async () => {
     try {
-      const response = await fetch(`${apiUrl}/download/image`)
+      const response = await fetch('/download/image')
       if (!response.ok) throw new Error('Download failed')
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
@@ -118,7 +101,7 @@ function App() {
         content: uploadText,
         metadata: { length: uploadText.length }
       }
-      const response = await fetch(`${apiUrl}/upload`, {
+      const response = await fetch('/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -156,7 +139,7 @@ function App() {
               mime_type: file.type || 'application/octet-stream'
             }
           }
-          const response = await fetch(`${apiUrl}/upload`, {
+          const response = await fetch('/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -263,7 +246,7 @@ function App() {
           </div>
         )
       case 'image':
-        const imageUrl = `${apiUrl}/download/image`
+        const imageUrl = '/download/image'
         return (
           <div className="content-container">
             <div className="content-header">
@@ -369,7 +352,7 @@ function App() {
       </div>
       <main className="main-content">{renderContent()}</main>
       <footer className="footer">
-        <p>EasyCopy Server: {apiUrl}</p>
+        <p>EasyCopy Webapp</p>
       </footer>
     </div>
   )

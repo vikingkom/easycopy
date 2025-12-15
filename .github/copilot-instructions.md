@@ -36,7 +36,7 @@ The webapp is **not a separate service** - it's built into `server/static/` and 
 
 ### Quick Start
 ```bash
-./start.sh  # Checks port, builds webapp if needed, starts server on 8000
+cd server && ./build_webapp.sh && python main.py  # Builds webapp if needed, starts server on 8000
 ```
 
 ### Manual Development

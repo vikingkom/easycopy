@@ -300,7 +300,6 @@ easycopy/
 │   │   └── vite.config.js
 │   └── static/           # Built webapp (generated)
 ├── docker-compose.yml    # Docker Compose config
-├── start.sh             # Quick start script
 └── README.md            # This file
 ```
 
@@ -308,7 +307,7 @@ easycopy/
 
 **Quick Start (Server + Web Viewer):**
 ```bash
-./start.sh
+cd server && ./build_webapp.sh && python main.py
 ```
 This builds and starts the integrated server with web viewer at `http://localhost:8000`
 

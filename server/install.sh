@@ -9,17 +9,6 @@ echo "║   EasyCopy Server Installation        ║"
 echo "╚═══════════════════════════════════════╝"
 echo ""
 
-# Check if Docker is installed
-if ! command -v docker &> /dev/null; then
-    echo "❌ Error: Docker is not installed"
-    echo ""
-    echo "Please install Docker first:"
-    echo "  - macOS: https://docs.docker.com/desktop/install/mac-install/"
-    echo "  - Linux: https://docs.docker.com/engine/install/"
-    echo "  - Windows: https://docs.docker.com/desktop/install/windows-install/"
-    exit 1
-fi
-
 # Check if Docker Compose is available
 if ! docker compose version &> /dev/null && ! command -v docker-compose &> /dev/null; then
     echo "❌ Error: Docker Compose is not installed"
@@ -27,8 +16,7 @@ if ! docker compose version &> /dev/null && ! command -v docker-compose &> /dev/
     exit 1
 fi
 
-echo "✅ Docker detected"
-echo ""
+
 
 # Download necessary files
 echo "📥 Downloading files..."

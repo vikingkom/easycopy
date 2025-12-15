@@ -43,21 +43,11 @@ This will:
 
 The server will be available at `http://localhost:8000` (or your configured port/domain).
 
-#### Production Setup (HTTPS)
+#### Production Setup
 
-**One-command production installation:**
+For production deployments, this repository intentionally leaves TLS termination to your infrastructure (reverse proxy, load balancer, or CDN). Use the `server/docker-compose.production.yml` to run the service in Docker and terminate HTTPS externally.
 
-```bash
-curl -sSL https://raw.githubusercontent.com/vikingkom/easycopy/master/server/install-production.sh | bash
-```
-
-This will:
-- Require a domain name
-- Set up nginx reverse proxy with SSL
-- Generate self-signed certificates (or configure for Let's Encrypt)
-- Enable automatic updates with Watchtower
-
-For trusted SSL certificates with Let's Encrypt, see [HTTPS_SETUP.md](server/HTTPS_SETUP.md).
+If you need an example reverse-proxy configuration, consider using Traefik, Caddy, or an nginx deployment outside of this repo to handle certificates.
 
 #### Manual Installation (Alternative)
 
@@ -73,7 +63,7 @@ cp easycopy.env.template easycopy.env
 # For development (HTTP)
 docker compose up -d
 
-# For production (HTTPS)
+# For production
 docker compose -f docker-compose.production.yml up -d
 ```
 
@@ -113,13 +103,13 @@ Set the environment variable to point to your server:
 # For local development (HTTP)
 export EASYCOPY_SERVER="http://localhost:8000"
 
-# For production deployment (HTTPS)
+# For production deployment
 export EASYCOPY_SERVER="https://your-domain"
 ```
 
 Make it permanent by adding to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.)
 
-**Note:** When using self-signed certificates, Python's requests library may show SSL verification warnings. For production, use proper CA-signed certificates or Let's Encrypt (see [HTTPS_SETUP.md](HTTPS_SETUP.md)).
+**Note:** This project does not generate or manage TLS certificates. If you run EasyCopy behind a reverse proxy or load balancer that terminates TLS, point `EASYCOPY_SERVER` to the external URL (for example `https://your-domain`).
 
 ### 4. Test the Scripts
 
@@ -268,7 +258,7 @@ Edit `server/main.py` to customize:
 
 For production use, consider:
 - Add API key authentication
-- Use HTTPS/TLS encryption
+ - Use HTTPS/TLS encryption (terminate TLS at your infrastructure edge)
 - Implement rate limiting
 - Add content size limits
 - Set up VPN or SSH tunnel for remote access
@@ -343,7 +333,7 @@ A React-based web application integrated into the server for monitoring clipboar
 
 The web viewer is available at the same URL as the server:
 - Development: `http://localhost:8000`
-- Production: `https://your-domain`
+ - Production: `https://your-domain` (terminate TLS externally)
 
 ### Building the Web Viewer
 

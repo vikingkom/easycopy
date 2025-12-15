@@ -48,11 +48,7 @@ server/static/
 **/node_modules/
 **/dist/
 
-# SSL certificates (sensitive - if using file-based certs)
-ssl/
-*.key
-*.crt
-*.pem
+# SSL certificate files (if you store them locally, consider adding them to .gitignore)
 
 # Environment variables
 .env

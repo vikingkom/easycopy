@@ -130,19 +130,7 @@ Both the API and web viewer are available at `http://localhost:8000` - no separa
 
 **For custom deployment:**
 
-**Option 1: Nginx reverse proxy**
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    
-    location / {
-        proxy_pass http://localhost:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
+Terminate TLS at your infrastructure edge (reverse proxy, load balancer, or CDN). The application itself runs on HTTP and does not manage certificates.
 
 ### Docker Deployment
 
@@ -260,7 +248,7 @@ FastAPI provides auto-generated docs:
 1. Set up keyboard shortcuts for upload/download (see main README)
 2. Configure for remote access
 3. Add authentication (future enhancement)
-4. Set up SSL/TLS for production
+4. Configure production deployment as needed (terminate TLS externally)
 
 ## Support
 

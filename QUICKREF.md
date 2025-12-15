@@ -186,7 +186,7 @@ cd webapp && npm install
 - **Production:** Add API keys or OAuth
 - **CORS:** Currently allows all origins (`*`)
   - Update `allow_origins` in `server/main.py` for production
-- **HTTPS:** Use reverse proxy (nginx) for SSL/TLS
+ - **TLS:** Terminate TLS at your infrastructure edge (reverse proxy, load balancer, CDN)
 
 ## 📱 Browser Support
 

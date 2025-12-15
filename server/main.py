@@ -6,6 +6,7 @@ Stores the latest clipboard content (text, file, or image) with metadata
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, Response, FileResponse
+import os
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -13,6 +14,7 @@ from typing import Optional, Literal
 import base64
 from datetime import datetime
 from pathlib import Path
+
 
 app = FastAPI(title="EasyCopy Server")
 
@@ -26,12 +28,20 @@ app.add_middleware(
 )
 
 # In-memory storage for the latest clipboard content
+# In-memory storage for the latest clipboard content
 clipboard_data = {
     "type": None,  # "text", "file", or "image"
     "content": None,  # The actual content (text or base64 encoded)
     "metadata": {},  # Additional metadata (filename, path, mime_type, etc.)
     "timestamp": None,
 }
+
+
+# Runtime config endpoint for frontend
+@app.get("/config.json")
+def get_config():
+    api_url = os.environ.get("EASYCOPY_DOMAIN") or f"http://localhost:{os.environ.get('EASYCOPY_PORT', '8000')}"
+    return {"api_url": api_url}
 
 
 class ClipboardUpload(BaseModel):

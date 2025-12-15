@@ -1,8 +1,37 @@
+
 import { useState, useEffect } from 'react'
 import './App.css'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+// API URL is loaded at runtime from /config.json (see server/main.py)
 const AUTO_REFRESH_INTERVAL = 5000 // 5 seconds
+
+function getDefaultApiUrl() {
+  // Fallback to window.location.origin if config.json is missing
+  return window.location.origin
+}
+
+function App() {
+  const [clipboardData, setClipboardData] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [textExpanded, setTextExpanded] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState(null)
+  const [uploadText, setUploadText] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [showUploadPanel, setShowUploadPanel] = useState(false)
+  const [apiUrl, setApiUrl] = useState(getDefaultApiUrl())
+
+  // Load API URL from /config.json at startup
+  useEffect(() => {
+    fetch('/config.json')
+      .then(res => res.ok ? res.json() : null)
+      .then(cfg => {
+        if (cfg && cfg.api_url) setApiUrl(cfg.api_url)
+      })
+      .catch(() => {})
+  }, [])
 
 function App() {
   const [clipboardData, setClipboardData] = useState(null)
@@ -20,7 +49,7 @@ function App() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch(`${API_URL}/status`)
+      const response = await fetch(`${apiUrl}/status`)
       
       if (!response.ok) {
         throw new Error('Failed to fetch clipboard status')
@@ -54,7 +83,7 @@ function App() {
 
   const downloadFile = async () => {
     try {
-      const response = await fetch(`${API_URL}/download/file`)
+      const response = await fetch(`${apiUrl}/download/file`)
       if (!response.ok) throw new Error('Download failed')
       
       const blob = await response.blob()
@@ -74,7 +103,7 @@ function App() {
 
   const downloadImage = async () => {
     try {
-      const response = await fetch(`${API_URL}/download/image`)
+      const response = await fetch(`${apiUrl}/download/image`)
       if (!response.ok) throw new Error('Download failed')
       
       const blob = await response.blob()
@@ -110,7 +139,7 @@ function App() {
         }
       }
 
-      const response = await fetch(`${API_URL}/upload`, {
+      const response = await fetch(`${apiUrl}/upload`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +186,7 @@ function App() {
             }
           }
 
-          const response = await fetch(`${API_URL}/upload`, {
+          const response = await fetch(`${apiUrl}/upload`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -283,7 +312,7 @@ function App() {
         )
 
       case 'image':
-        const imageUrl = `${API_URL}/download/image`
+        const imageUrl = `${apiUrl}/download/image`
         
         return (
           <div className="content-container">
@@ -447,7 +476,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>EasyCopy Server: {API_URL}</p>
+        <p>EasyCopy Server: {apiUrl}</p>
       </footer>
     </div>
   )

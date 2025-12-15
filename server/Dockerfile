@@ -2,8 +2,10 @@ FROM node:18-slim AS webapp-builder
 
 WORKDIR /webapp
 
-# Copy webapp files from server/webapp
+
+# Copy webapp files and .env for build-time API URL
 COPY server/webapp/package.json server/webapp/package-lock.json* ./
+COPY server/webapp/.env ./  # Copy .env if present
 RUN npm install
 
 COPY server/webapp/ ./

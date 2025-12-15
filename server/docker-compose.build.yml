@@ -12,4 +12,5 @@ services:
       - .env
     environment:
       - TZ=${TZ:-UTC}
+      - VITE_API_URL=${EASYCOPY_DOMAIN:-http://localhost:8000}
     container_name: easycopy-server

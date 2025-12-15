@@ -4,7 +4,7 @@ services:
   easycopy-server:
     image: vikingkom/easycopy-server:latest
     ports:
-      - "${EASYCOPY_PORT:-8000}:8000"
+      - "${HTTP_PORT:-8000}:8000"
     restart: unless-stopped
     env_file:
       - .env

@@ -7,6 +7,7 @@ services:
     environment:
       - TZ=UTC
       - VITE_API_URL=${EASYCOPY_DOMAIN:-http://localhost:8000}
+      - EASYCOPY_PORT=${HTTP_PORT:-8000}
     container_name: easycopy-server
     networks:
       - easycopy-network
@@ -16,8 +17,8 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ssl-certs:/etc/nginx/ssl:ro
@@ -29,6 +30,8 @@ services:
       - easycopy-network
     environment:
       - SSL_DOMAIN=${SSL_DOMAIN:-localhost}
+      - HTTP_PORT=${HTTP_PORT:-80}
+      - HTTPS_PORT=${HTTPS_PORT:-443}
 
   certbot:
     image: alpine:latest

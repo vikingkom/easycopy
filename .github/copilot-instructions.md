@@ -76,7 +76,8 @@ Both clients need GTK3 bindings (`python3-gi`) installed via apt/dnf - pip can't
 **Configuration** (`server/easycopy.env` for server, environment variables for clients):
 - `EASYCOPY_SERVER`: Client target URL (default: `http://localhost:8000`)
 - `EASYCOPY_DOWNLOAD_DIR`: File save location (default: `~/Downloads/easycopy`)
-- `EASYCOPY_PORT`: Server port (default: 8000)
+- `HTTP_PORT`: Server port (default: 8000)
+- `HTTPS_PORT`: Server port (default: 443)
 - `EASYCOPY_DOMAIN`: Server domain (optional)
 - `SSL_DOMAIN`: Production SSL cert domain (server/docker-compose.production.yml only)
 

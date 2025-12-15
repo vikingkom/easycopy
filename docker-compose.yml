@@ -6,10 +6,11 @@ services:
       context: ..
       dockerfile: server/Dockerfile
     ports:
-      - "${EASYCOPY_PORT:-8000}:8000"
+      - "${HTTP_PORT:-8000}:8000"
     restart: unless-stopped
     env_file:
       - .env
     environment:
       - TZ=${TZ:-UTC}
+      - EASYCOPY_PORT=${HTTP_PORT:-8000}
     container_name: easycopy-server

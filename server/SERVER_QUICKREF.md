@@ -30,6 +30,12 @@ EASYCOPY_DOWNLOAD_DIR=~/Downloads/easycopy
 
 # Timezone
 TZ=UTC
+
+# Public HTTP and HTTPS ports (optional)
+# Set these to avoid port conflicts on the host. Example: HTTP_PORT=8080 HTTPS_PORT=8443
+# If unset, defaults are HTTP_PORT=80 and HTTPS_PORT=443
+# HTTP_PORT=80
+# HTTPS_PORT=443
 ```
 
 After changing configuration:
@@ -101,7 +107,7 @@ export EASYCOPY_SERVER="http://your-server.com:8000"
 ### Port already in use
 ```bash
 # Change port in easycopy.env
-EASYCOPY_PORT=8001
+HTTP_PORT=8001
 
 # Restart
 docker compose restart

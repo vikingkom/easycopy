@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "easycopy-webapp",
   "version": "1.0.0",
   "description": "EasyCopy Web Viewer",

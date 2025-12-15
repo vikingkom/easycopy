@@ -1,7 +1,7 @@
 
+
 import { useState, useEffect } from 'react'
 import './App.css'
-
 
 // API URL is loaded at runtime from /config.json (see server/main.py)
 const AUTO_REFRESH_INTERVAL = 5000 // 5 seconds
@@ -33,30 +33,16 @@ function App() {
       .catch(() => {})
   }, [])
 
-function App() {
-  const [clipboardData, setClipboardData] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [autoRefresh, setAutoRefresh] = useState(true)
-  const [textExpanded, setTextExpanded] = useState(false)
-  const [lastUpdated, setLastUpdated] = useState(null)
-  const [uploadText, setUploadText] = useState('')
-  const [uploading, setUploading] = useState(false)
-  const [showUploadPanel, setShowUploadPanel] = useState(false)
+  // ...existing logic for fetchClipboardStatus, copyToClipboard, downloadFile, downloadImage, uploadTextContent, uploadFile, handleFileSelect, formatTimestamp, formatFileSize, getTruncatedText, useEffect for autoRefresh...
 
+  // Re-insert the main renderContent and return JSX from previous correct version
   const fetchClipboardStatus = async () => {
     try {
       setLoading(true)
       setError(null)
-      
       const response = await fetch(`${apiUrl}/status`)
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch clipboard status')
-      }
-      
+      if (!response.ok) throw new Error('Failed to fetch clipboard status')
       const data = await response.json()
-      
       if (data.has_data) {
         setClipboardData(data)
         setLastUpdated(new Date())
@@ -85,7 +71,6 @@ function App() {
     try {
       const response = await fetch(`${apiUrl}/download/file`)
       if (!response.ok) throw new Error('Download failed')
-      
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -105,7 +90,6 @@ function App() {
     try {
       const response = await fetch(`${apiUrl}/download/image`)
       if (!response.ok) throw new Error('Download failed')
-      
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -126,29 +110,20 @@ function App() {
       alert('Please enter some text to upload')
       return
     }
-
     try {
       setUploading(true)
       setError(null)
-
       const payload = {
         type: 'text',
         content: uploadText,
-        metadata: {
-          length: uploadText.length
-        }
+        metadata: { length: uploadText.length }
       }
-
       const response = await fetch(`${apiUrl}/upload`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-
       if (!response.ok) throw new Error('Upload failed')
-
       await response.json()
       alert('Text uploaded successfully!')
       setUploadText('')
@@ -167,14 +142,10 @@ function App() {
     try {
       setUploading(true)
       setError(null)
-
-      // Read file as base64
       const reader = new FileReader()
-      
       reader.onload = async (e) => {
         try {
-          const base64Content = e.target.result.split(',')[1] // Remove data:...;base64, prefix
-
+          const base64Content = e.target.result.split(',')[1]
           const payload = {
             type: 'file',
             content: base64Content,
@@ -185,17 +156,12 @@ function App() {
               mime_type: file.type || 'application/octet-stream'
             }
           }
-
           const response = await fetch(`${apiUrl}/upload`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           })
-
           if (!response.ok) throw new Error('Upload failed')
-
           await response.json()
           alert('File uploaded successfully!')
           setShowUploadPanel(false)
@@ -208,13 +174,11 @@ function App() {
           setUploading(false)
         }
       }
-
       reader.onerror = () => {
         setError('Failed to read file')
         alert('Failed to read file')
         setUploading(false)
       }
-
       reader.readAsDataURL(file)
     } catch (err) {
       setError(err.message)
@@ -226,9 +190,7 @@ function App() {
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0]
-    if (file) {
-      uploadFile(file)
-    }
+    if (file) uploadFile(file)
   }
 
   const formatTimestamp = (timestamp) => {
@@ -258,11 +220,9 @@ function App() {
 
   useEffect(() => {
     if (!autoRefresh) return
-
     const interval = setInterval(() => {
       fetchClipboardStatus()
     }, AUTO_REFRESH_INTERVAL)
-
     return () => clearInterval(interval)
   }, [autoRefresh])
 
@@ -275,12 +235,10 @@ function App() {
         </div>
       )
     }
-
     switch (clipboardData.type) {
       case 'text':
         const textContent = clipboardData.content || ''
         const needsTruncation = textContent.length > 300
-        
         return (
           <div className="content-container">
             <div className="content-header">
@@ -294,26 +252,18 @@ function App() {
             </div>
             <div className="action-buttons">
               {needsTruncation && (
-                <button 
-                  onClick={() => setTextExpanded(!textExpanded)}
-                  className="btn btn-secondary"
-                >
+                <button onClick={() => setTextExpanded(!textExpanded)} className="btn btn-secondary">
                   {textExpanded ? 'Show Less' : 'Show More'}
                 </button>
               )}
-              <button 
-                onClick={() => copyToClipboard(textContent)}
-                className="btn btn-primary"
-              >
+              <button onClick={() => copyToClipboard(textContent)} className="btn btn-primary">
                 Copy to Clipboard
               </button>
             </div>
           </div>
         )
-
       case 'image':
         const imageUrl = `${apiUrl}/download/image`
-        
         return (
           <div className="content-container">
             <div className="content-header">
@@ -330,22 +280,15 @@ function App() {
               <img src={imageUrl} alt="Clipboard content" />
             </div>
             <div className="action-buttons">
-              <button 
-                onClick={() => copyToClipboard(imageUrl)}
-                className="btn btn-secondary"
-              >
+              <button onClick={() => copyToClipboard(imageUrl)} className="btn btn-secondary">
                 Copy Image URL
               </button>
-              <button 
-                onClick={downloadImage}
-                className="btn btn-primary"
-              >
+              <button onClick={downloadImage} className="btn btn-primary">
                 Download Image
               </button>
             </div>
           </div>
         )
-
       case 'file':
         return (
           <div className="content-container">
@@ -362,16 +305,12 @@ function App() {
               <p className="file-name">{clipboardData.metadata.filename}</p>
             </div>
             <div className="action-buttons">
-              <button 
-                onClick={downloadFile}
-                className="btn btn-primary"
-              >
+              <button onClick={downloadFile} className="btn btn-primary">
                 Download File
               </button>
             </div>
           </div>
         )
-
       default:
         return <div className="empty-state">Unknown content type</div>
     }
@@ -383,84 +322,42 @@ function App() {
         <h1>EasyCopy Viewer</h1>
         <p className="subtitle">Monitor your clipboard sync in real-time</p>
       </header>
-
       <div className="controls">
-        <button 
-          onClick={fetchClipboardStatus} 
-          disabled={loading}
-          className="btn btn-refresh"
-        >
+        <button onClick={fetchClipboardStatus} disabled={loading} className="btn btn-refresh">
           {loading ? 'Refreshing...' : '🔄 Refresh'}
         </button>
-
-        <button 
-          onClick={() => setShowUploadPanel(!showUploadPanel)}
-          className="btn btn-primary"
-        >
+        <button onClick={() => setShowUploadPanel(!showUploadPanel)} className="btn btn-primary">
           {showUploadPanel ? '✕ Close Upload' : '⬆️ Upload'}
         </button>
-        
         <label className="auto-refresh-toggle">
-          <input 
-            type="checkbox" 
-            checked={autoRefresh}
-            onChange={(e) => setAutoRefresh(e.target.checked)}
-          />
+          <input type="checkbox" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
           <span>Auto-refresh (5s)</span>
         </label>
-        
         {lastUpdated && (
-          <span className="last-updated">
-            Last updated: {lastUpdated.toLocaleTimeString()}
-          </span>
+          <span className="last-updated">Last updated: {lastUpdated.toLocaleTimeString()}</span>
         )}
       </div>
-
       {error && (
-        <div className="error-banner">
-          ⚠️ Error: {error}
-        </div>
+        <div className="error-banner">⚠️ Error: {error}</div>
       )}
-
       {showUploadPanel && (
         <div className="upload-panel">
           <h3>Upload Content</h3>
-          
           <div className="upload-section">
             <h4>📝 Upload Text</h4>
-            <textarea
-              value={uploadText}
-              onChange={(e) => setUploadText(e.target.value)}
-              placeholder="Type or paste your text here..."
-              rows={6}
-              disabled={uploading}
-            />
-            <button 
-              onClick={uploadTextContent}
-              disabled={uploading || !uploadText.trim()}
-              className="btn btn-primary"
-            >
+            <textarea value={uploadText} onChange={(e) => setUploadText(e.target.value)} placeholder="Type or paste your text here..." rows={6} disabled={uploading} />
+            <button onClick={uploadTextContent} disabled={uploading || !uploadText.trim()} className="btn btn-primary">
               {uploading ? 'Uploading...' : 'Upload Text'}
             </button>
           </div>
-
           <div className="upload-section">
             <h4>📁 Upload File</h4>
-            <input
-              type="file"
-              onChange={handleFileSelect}
-              disabled={uploading}
-              id="file-upload"
-              style={{ display: 'none' }}
-            />
-            <label htmlFor="file-upload" className={`btn btn-secondary ${uploading ? 'disabled' : ''}`}>
-              {uploading ? 'Uploading...' : 'Choose File'}
-            </label>
+            <input type="file" onChange={handleFileSelect} disabled={uploading} id="file-upload" style={{ display: 'none' }} />
+            <label htmlFor="file-upload" className={`btn btn-secondary ${uploading ? 'disabled' : ''}`}>{uploading ? 'Uploading...' : 'Choose File'}</label>
             <p className="upload-hint">Select any file to upload to clipboard</p>
           </div>
         </div>
       )}
-
       <div className="clipboard-info">
         {clipboardData && (
           <div className="info-bar">
@@ -470,11 +367,7 @@ function App() {
           </div>
         )}
       </div>
-
-      <main className="main-content">
-        {renderContent()}
-      </main>
-
+      <main className="main-content">{renderContent()}</main>
       <footer className="footer">
         <p>EasyCopy Server: {apiUrl}</p>
       </footer>
@@ -483,3 +376,5 @@ function App() {
 }
 
 export default App
+
+

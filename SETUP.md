@@ -250,6 +250,42 @@ FastAPI provides auto-generated docs:
 3. Add authentication (future enhancement)
 4. Configure production deployment as needed (terminate TLS externally)
 
+## Troubleshooting
+
+### SSL Module Not Available (HTTPS Error)
+
+**Problem:** When using HTTPS URLs, clients fail with:
+```
+Error: Can't connect to HTTPS URL because the SSL module is not available.
+```
+
+**Cause:** Python was compiled without SSL support (common with pyenv on macOS).
+
+**Solution on macOS:**
+
+1. Install OpenSSL via Homebrew (if not already installed):
+```bash
+brew install openssl@3
+```
+
+2. Rebuild Python with SSL support:
+```bash
+export LDFLAGS="-L$(brew --prefix openssl@3)/lib"
+export CPPFLAGS="-I$(brew --prefix openssl@3)/include"
+export PKG_CONFIG_PATH="$(brew --prefix openssl@3)/lib/pkgconfig"
+
+pyenv install --force 3.11.3  # Replace with your Python version
+```
+
+3. Verify SSL works:
+```bash
+python -c "import ssl; print(ssl.OPENSSL_VERSION)"
+```
+
+Should output something like: `OpenSSL 3.4.0 ...`
+
+**Alternative:** Use system Python or Python from python.org which includes SSL support.
+
 ## Support
 
 For issues or questions:

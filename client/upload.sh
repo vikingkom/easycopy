@@ -2,6 +2,7 @@
 
 #set -e
 source "$(dirname "$0")/.venv/bin/activate"
-OUTPUT=$(/Users/vladimir.komarevskiy/.pyenv/versions/3.11.3/bin/python -u "$(dirname "$0")/upload.py")
+OUTPUT=$(python -u "$(dirname "$0")/upload.py")
 CMD="display notification \"$OUTPUT\" with title \"Clip-context\""
 osascript -e "$CMD"
+echo $OUTPUT

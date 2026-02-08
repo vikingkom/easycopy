@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   publicDir: 'public',
   build: {
-    outDir: '../static',
+    outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
       output: {

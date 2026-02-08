@@ -4,13 +4,13 @@ EasyCopy Server - Simple clipboard sync server
 Stores the latest clipboard content (text, file, or image) with metadata
 """
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse, Response, FileResponse
+from fastapi import FastAPI, HTTPException, UploadFile, Form, File
+from fastapi.responses import JSONResponse, Response, FileResponse, RedirectResponse
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 import base64
 from datetime import datetime
 from pathlib import Path
@@ -158,6 +158,60 @@ async def download_file():
         media_type=mime_type,
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+
+
+@app.post("/share-target")
+async def share_target(
+    title: Optional[str] = Form(None),
+    text: Optional[str] = Form(None),
+    url: Optional[str] = Form(None),
+    files: Optional[List[UploadFile]] = File(None)
+):
+    """Handle Web Share Target API requests"""
+    try:
+        # Handle shared files
+        if files and len(files) > 0:
+            file = files[0]
+            content = await file.read()
+            base64_content = base64.b64encode(content).decode('utf-8')
+            
+            clipboard_data["type"] = "file"
+            clipboard_data["content"] = base64_content
+            clipboard_data["metadata"] = {
+                "filename": file.filename,
+                "original_path": file.filename,
+                "size": len(content),
+                "mime_type": file.content_type or "application/octet-stream",
+                "shared_from": "web_share_api"
+            }
+            clipboard_data["timestamp"] = datetime.now().isoformat()
+        
+        # Handle shared text/URL
+        elif text or url:
+            content_parts = []
+            if title:
+                content_parts.append(f"Title: {title}")
+            if text:
+                content_parts.append(text)
+            if url:
+                content_parts.append(f"URL: {url}")
+            
+            content = "\n".join(content_parts)
+            clipboard_data["type"] = "text"
+            clipboard_data["content"] = content
+            clipboard_data["metadata"] = {
+                "length": len(content),
+                "shared_from": "web_share_api",
+                "title": title
+            }
+            clipboard_data["timestamp"] = datetime.now().isoformat()
+        
+        # Redirect back to main page
+        return RedirectResponse(url="/", status_code=303)
+    
+    except Exception as e:
+        print(f"Error handling shared content: {e}")
+        return RedirectResponse(url="/?error=share_failed", status_code=303)
 
 
 @app.get("/download/image")

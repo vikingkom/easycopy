@@ -3,6 +3,16 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  publicDir: 'public',
+  build: {
+    outDir: '../static',
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  },
   server: {
     port: 8000,
     proxy: {
@@ -10,7 +20,8 @@ export default defineConfig({
       '/download': 'http://localhost:8000',
       '/status': 'http://localhost:8000',
       '/clear': 'http://localhost:8000',
-      '/health': 'http://localhost:8000'
+      '/health': 'http://localhost:8000',
+      '/share-target': 'http://localhost:8000'
     }
   }
 })
